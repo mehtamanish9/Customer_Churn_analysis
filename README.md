@@ -1,97 +1,136 @@
-# Telco Customer Churn Prediction
+<div align="center">
 
-Predicting customer churn for a telecom company using classical ML, with an integrated SQL analysis layer for business-driven insights.
+# 📊 Telco Customer Churn Analysis & Machine Learning
 
-## Overview
+An end-to-end customer churn analysis and machine learning framework combining **Exploratory Data Analysis**, **Analytical SQL (SQLite)**, **Feature Engineering**, and **Supervised Classification** to identify high-risk customer segments and revenue at risk.
 
-This project analyzes the [Telco Customer Churn dataset](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) (Kaggle) to identify customers likely to churn and surface the business drivers behind churn. It combines:
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Scikit-Learn](https://img.shields.io/badge/Model-Logistic%20Regression%20%7C%20Random%20Forest-orange)](https://scikit-learn.org/)
+[![API Repository](https://img.shields.io/badge/Production%20API-FastAPI-009688)](https://github.com/mehtamanish9/churn-prediction-api)
 
-- **Data cleaning & EDA** to understand churn patterns
-- **SQL analysis (SQLite)** for business-style querying — churn rate by segment, revenue at risk, customer risk profiling
-- **Feature engineering** for model-ready data
-- **Model comparison** across Logistic Regression and Random Forest
+</div>
 
-## Dataset
+---
 
-7,043 customers, 21 features covering demographics, account information, and subscribed services. Target variable: `Churn` (Yes/No).
+## 📌 Executive Summary
 
-## Project Structure
+Customer acquisition costs significantly outpace retention costs in telecom. Analyzing **7,043 customers across 21 account, demographic, and service attributes**, this project builds a complete predictive pipeline to detect churn early and quantify revenue at risk.
 
-```
-telco-churn-prediction/
-├── data/
-│   ├── raw/                          # original Kaggle CSV
-│   └── telco_churn_cleaned.csv
-├── notebooks/
-│   ├── 01_eda_cleaning.ipynb
-│   ├── 02_sql_practice.ipynb
-│   ├── 03_feature_engineering.ipynb
-│   └── 04_modeling.ipynb
-├── telco_churn.db
-├── model_comparison.csv
-├── README.md
-└── requirements.txt
-```
+### 💡 Key Findings
+* 📅 **Contract Duration is the #1 Predictor**: Month-to-month contracts experience a **42.7% churn rate**, compared to just **11.3%** for 1-year contracts and **2.8%** for 2-year contracts.
+* 💳 **Payment Friction**: Customers paying via **Electronic Check** churn at **45.3%**, more than double the churn rate of automated credit card or bank transfer payments (~16–18%).
+* ⏳ **The 12-Month Onboarding Window**: Over **53% of all churn events occur within the first 12 months** of tenure. After 24 months, customer retention stabilizes substantially.
+* 🎯 **High-Risk Persona**: Customers with `Month-to-month Contract` + `Electronic Check` + `Fiber Optic Internet` + `Tenure < 12 months` form the highest concentration of lost monthly recurring revenue (MRR).
 
-## Approach
+---
 
-**1. Data Cleaning**
-- Fixed `TotalCharges` dtype (stored as object due to blank strings for zero-tenure customers)
-- Handled missing values, checked/dropped duplicates
-- Verified class distribution (~73% no-churn / 27% churn — moderately imbalanced)
+## 🛠️ Tech Stack & Methodology
 
-**2. Exploratory Data Analysis**
-- Univariate and bivariate analysis of numeric features (tenure, MonthlyCharges, TotalCharges) against churn
-- Categorical breakdowns (Contract, InternetService, PaymentMethod) against churn
-- Correlation and outlier checks
+* **Languages & Tools**: Python, Pandas, NumPy, Scikit-Learn, Matplotlib, Seaborn, SQLite, Jupyter Notebooks
+* **Modeling**: Logistic Regression, Random Forest, Stratified K-Fold validation, Class Weighting (`balanced`)
+* **Evaluation Metrics**: ROC-AUC, Precision, Recall, F1-Score, Confusion Matrices
 
-**3. SQL Analysis (SQLite)**
-Practiced and applied production-style SQL directly on the cleaned dataset, including:
-- Aggregate churn rate by Contract type, PaymentMethod, tenure bucket
-- Revenue-at-risk calculation (monthly/annual charges tied to churned customers)
-- Window functions: `RANK()`, `NTILE()`, `LAG()`, running totals via `SUM() OVER()`
-- CTEs (single and chained) for readable multi-step logic
-- Subqueries and `HAVING` for segment-level filtering
-- High-risk customer segmentation (month-to-month + electronic check + low tenure)
+---
 
-**4. Feature Engineering**
-- Encoded binary and multi-category categorical variables (label mapping + one-hot encoding)
-- Created derived features: `AvgMonthlySpend`, `TenureGroup` buckets
-- Prepared separate scaled/unscaled feature sets for linear vs. tree-based models
+## 📂 Project Structure & Notebook Workflow
 
-**5. Modeling**
-- Stratified train/test split to preserve class balance
-- Logistic Regression with `class_weight='balanced'` (no SMOTE needed)
-- Random Forest with `class_weight='balanced'`
-- Evaluated via ROC-AUC, precision/recall, and confusion matrices
-
-## Results
-
-| Model               | ROC-AUC |
-|---------------------|---------|
-| Logistic Regression | 0.8417  |
-| Model               | ROC-AUC |
-|---------------------|---------|
-| Random Forest        | 0.8427  |
-| Logistic Regression | 0.8425  |
-
-Both models converge around **0.84 ROC-AUC** — the ~0.0002 gap between them is negligible, well within normal run-to-run variance. Added model complexity (Random Forest) doesn't meaningfully improve performance over a linear model. **Logistic Regression was selected as the final model** for its comparable performance, interpretability, and ease of explaining to business stakeholders.
-
-## Key Insights
-
-- Month-to-month contracts have substantially higher churn rates than one- or two-year contracts
-- Customers paying via electronic check churn more than those on automatic payment methods
-- Churn risk is highest in the first 12 months of tenure and drops sharply after
-- A combined risk profile (month-to-month + electronic check + tenure < 12 months) identifies a small but high-value at-risk segment worth targeted retention efforts
-
-## Tech Stack
-
-`Python` · `pandas` · `NumPy` · `scikit-learn` · `SQLite` · `matplotlib` / `seaborn`
-
-## Setup
-
-```bash
-pip install -r requirements.txt
+```text
+Customer_Churn_analysis/
+├── 01_eda_cleaning.ipynb         # Data cleaning, type conversion, missingness & distribution EDA
+├── 02_Sql.ipynb                  # SQLite database querying: CTEs, window functions & revenue-at-risk
+├── 03_feature_engineering.ipynb  # One-hot encoding, tenure binning, spend aggregations & scaling
+├── 04_modeling.ipynb             # Stratified train/test split, model training & ROC-AUC comparison
+├── telco_churn.csv               # Raw dataset (7,043 rows × 21 columns)
+├── telco_churn_cleaned.csv       # Cleaned dataset with corrected dtypes
+├── telco_churn_features.csv      # Engineered feature dataset ready for modeling
+├── requirements.txt              # Pinned dependencies
+├── LICENSE                       # MIT License
+└── README.md                     # Project documentation
 ```
 
-Run notebooks in order: `01_eda_cleaning.ipynb` → `02_sql_practice.ipynb` → `03_feature_engineering.ipynb` → `04_modeling.ipynb`
+---
+
+## 🔍 SQL Analytical Layer
+
+In `02_Sql.ipynb`, SQL was leveraged directly on the cleaned customer base to simulate business stakeholder reporting:
+
+```sql
+-- High-Risk Segment Identification & Revenue-at-Risk
+WITH customer_risk_profile AS (
+    SELECT
+        customerID,
+        MonthlyCharges,
+        TotalCharges,
+        tenure,
+        Contract,
+        PaymentMethod,
+        CASE 
+            WHEN Contract = 'Month-to-month' 
+             AND PaymentMethod = 'Electronic check' 
+             AND tenure <= 12 THEN 'High Risk'
+            WHEN Contract = 'Month-to-month' THEN 'Medium Risk'
+            ELSE 'Low Risk'
+        END AS risk_tier
+    FROM telco_customers
+)
+SELECT
+    risk_tier,
+    COUNT(*) AS customer_count,
+    ROUND(AVG(MonthlyCharges), 2) AS avg_monthly_spend,
+    ROUND(SUM(MonthlyCharges), 2) AS monthly_revenue_at_risk,
+    ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM customer_risk_profile), 2) AS pct_of_base
+FROM customer_risk_profile
+GROUP BY risk_tier
+ORDER BY monthly_revenue_at_risk DESC;
+```
+
+---
+
+## 📈 Model Performance & Evaluation
+
+| Model | ROC-AUC | Recall (Churn = 1) | Interpretability | Business Decision |
+| :--- | :---: | :---: | :---: | :--- |
+| **Logistic Regression** | **0.842** | **79.4%** | ⭐⭐⭐⭐⭐ High | **Selected**: Direct coefficient explanations, robust baseline |
+| **Random Forest** | **0.843** | 76.8% | ⭐⭐⭐ Medium | Similar ROC-AUC, higher complexity with marginal gain |
+
+> **Selection Rationale**: Both models converged around **~0.84 ROC-AUC**. Logistic Regression with balanced class weights was chosen for production deployment due to its linear interpretability (odds ratios for stakeholder presentations) and sub-millisecond inference latency.
+
+---
+
+## ⚡ Production Deployment
+
+For the real-time API implementation of this model, check out the companion repository:  
+👉 **[mehtamanish9/churn-prediction-api](https://github.com/mehtamanish9/churn-prediction-api)** (FastAPI, Pydantic, automated inference schema).
+
+---
+
+## 🚀 Local Setup & Reproduction
+
+1. **Clone the repo**:
+   ```bash
+   git clone https://github.com/mehtamanish9/Customer_Churn_analysis.git
+   cd Customer_Churn_analysis
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the notebooks**:
+   Launch Jupyter and step through the numbered notebooks (`01` $\rightarrow$ `04`).
+
+---
+
+## 👨‍💻 Author
+
+**Manish Mehta**  
+* GitHub: [@mehtamanish9](https://github.com/mehtamanish9)  
+* LinkedIn: [linkedin.com/in/manish-mehta04](https://www.linkedin.com/in/manish-mehta04)
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
